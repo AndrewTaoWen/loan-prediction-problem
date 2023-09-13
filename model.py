@@ -12,6 +12,7 @@ train_df = pd.read_csv('./archive/train_u6lujuX_CVtuZ9i.csv')
 train_df['Loan_Status'] = train_df['Loan_Status'].map({'Y': 1, 'N': 0})  # Encoding target
 
 # Impute missing values and preprocess
+
 columnsMissingVals = ["Gender", "Married", "Dependents", "Self_Employed", "LoanAmount", "Loan_Amount_Term", "Credit_History"]
 
 for col in columnsMissingVals:
@@ -46,9 +47,39 @@ fit = rfe.fit(X_train, y_train)
 val_predictions = fit.predict(X_val)
 
 # Evaluate the model on the validation set
-scores = cross_val_score(model, X, y, cv=5)
-print("Cross-validation scores:", scores)
-print("Average cross-validation score:", scores.mean())
+# scores = cross_val_score(model, X, y, cv=5)
+# print("Cross-validation scores:", scores)
+# print("Average cross-validation score:", scores.mean())
 
 val_accuracy = accuracy_score(y_val, val_predictions)
 print(f"Validation Accuracy: {val_accuracy * 100:.2f}%")
+
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import classification_report
+
+# Using RandomForestClassifier
+rf = RandomForestClassifier()
+rf.fit(X_train, y_train)
+val_predictions_rf = rf.predict(X_val)
+print("Random Forest Validation Accuracy:", accuracy_score(y_val, val_predictions_rf))
+
+# Using GradientBoostingClassifier
+gb = GradientBoostingClassifier()
+gb.fit(X_train, y_train)
+val_predictions_gb = gb.predict(X_val)
+print("Gradient Boosting Validation Accuracy:", accuracy_score(y_val, val_predictions_gb))
+
+# Hyperparameter Tuning on Logistic Regression
+param_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100], 'penalty': ['l1', 'l2']}
+grid = GridSearchCV(LogisticRegression(solver='liblinear'), param_grid, cv=5)
+grid.fit(X_train, y_train)
+print("Best Parameters:", grid.best_params_)
+
+# Using the best model
+best_model = grid.best_estimator_
+val_predictions_best = best_model.predict(X_val)
+print("Best Model Validation Accuracy:", accuracy_score(y_val, val_predictions_best))
+
+# Classification report for detailed metrics
+# print(classification_report(y_val, val_predictions_best))
