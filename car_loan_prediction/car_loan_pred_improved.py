@@ -1,9 +1,9 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.model_selection import GridSearchCV, cross_val_score, train_test_split
 
 df = pd.read_csv('./car_loan_data/train.csv')
 
@@ -43,7 +43,7 @@ y = df['loan_default']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Initialize and fit the model
-rf_clf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_clf = RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced')
 rf_clf.fit(X_train, y_train)
 
 # Predict and evaluate the model
@@ -54,3 +54,15 @@ print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
 print("\nAccuracy Score:")
 print(accuracy_score(y_test, y_pred))
+print("\nCross Val Scores:")
+print(cross_val_score(rf_clf, X, y, cv=5))
+
+param_grid = {
+    'n_estimators': [100, 200, 300],
+    'max_depth': [10, 20, 30],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4]
+}
+grid_search = GridSearchCV(estimator=rf_clf, param_grid=param_grid, cv=3)
+grid_search.fit(X_train, y_train)
+best_params = grid_search.best_params_
