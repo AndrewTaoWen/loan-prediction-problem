@@ -12,9 +12,6 @@ train_df = pd.read_csv('./archive/train_u6lujuX_CVtuZ9i.csv')
 train_df['Loan_Status'] = train_df['Loan_Status'].map({'Y': 1, 'N': 0})  # Encoding target
 
 # Impute missing values and preprocess
-
-columnsMissingVals = ["Gender", "Married", "Dependents", "Self_Employed", "LoanAmount", "Loan_Amount_Term", "Credit_History"]
-
 for col in columnsMissingVals:
     if train_df[col].dtype == 'object':
         train_df[col].fillna(train_df[col].mode()[0], inplace=True)
